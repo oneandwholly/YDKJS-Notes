@@ -1,4 +1,4 @@
-# `this`
+# `this` keyword
 
 the keyword `this` is automatically defined in the scope of every function.
 
@@ -47,3 +47,145 @@ speak(you); // Hello, I am READER
 ```
 
 `this` mechanism allows more elegant way of passing around object reference, which leads to cleaner API design and easier re-use. It becomes more apparent as the usage pattern gets more complex.
+
+## Clarifying Misconceptions
+
+The name `this` creates confusion when people take it too literally. There are two meaning often assumed mistakenly for `this`.
+
+### itself
+
+beginners often think `this` refers to the function object itself, which is incorrect.
+
+In the following examples, we try to find how many times `foo()` was called.
+
+```javascript
+function foo(num) {
+  console.log("foo: " + num);
+
+  // keep track of how many times foo is called.
+  this.count++;
+}
+
+foo.count = 0; // initialize count with 0.
+
+var  i;
+
+for (i=0; i<10; i++) {
+  if (i > 5) {
+    foo(i);
+  }
+}
+// foo: 6
+// foo: 7
+// foo: 8
+// foo: 9
+
+// how many times was foo called?
+console.log(foo.count) // 0 --- still
+```
+
+The code snippet shows `this.count` does not reference `foo.count`. Instead, there is a global variable `count` that is set to `Nan`, so `this` was referencing the window object.
+
+At this point, people just try to get around the problem by hacking toward some other solution, such as:
+
+```javascript
+function foo(num) {
+  console.log("foo: " + num);
+  data.count++;
+}
+
+var data = {
+  count: 0
+};
+
+var i;
+
+for (i=0; i<10; i++) {
+  if (i > 5) {
+    foo(i);
+  }
+}
+// foo: 6
+// foo: 7
+// foo: 8
+// foo: 9
+
+// how many time was `foo` called?
+console.log(data.count); // 4
+```
+
+while this approach solves the problem, it does not help with out lack of understanding of `this`, and relies on lexical scope.
+
+if you want to reference `foo` from inside the function itself, `this` won't be enough. you generally need a reference to the function object via variable that points at it.
+
+```javascript
+function foo() {
+  foo.count = 4; // `foo` refers to itself
+}
+
+setTimeout(function() {
+  // no way to refer to itself for anon. function
+}, 100)
+```
+
+`arguments.callee` refers to the function object, and usually the only way to refer to itself in anonymous functions, but its use is frowned upon, so it is better to use named function when reference to itself is needed.
+
+Other solution without using `this` and using the identifier `foo` to refence itself:
+
+```javascript
+function foo(num) {
+  console.log("foo: " + num);
+  foo.count++;
+}
+
+foo.count = 0;
+
+var i;
+
+for (i=0; i<10; i++) {
+  if (i > 5) {
+      foo(i);
+  }
+}
+// foo: 6
+// foo: 7
+// foo: 8
+// foo: 9
+
+// how many times was `foo` called?
+console.log(foo.count);
+```
+
+this example works, but it side-steps actual understanding of how `this` works
+
+another solution is to force `this` to point to `foo` itself:
+
+```javascript
+function foo(num) {
+  console.log("num: " + num);
+
+  // keep track of how many times `foo` is called
+  // `this` is actually `foo` now, base on
+  // how `foo` is called
+  this.count++;
+}
+
+foo.count = 0;
+
+var i;
+
+for (i=0; i < 10; i++) {
+  if (i > 5) {
+    foo.call(foo, i);
+  }
+}
+// foo: 6
+// foo: 7
+// foo: 8
+// foo: 9
+
+// how many times was `foo` called?
+console.log(foo.count); // 4
+```
+
+Instead of avoiding to use `this`, we embrace it!
