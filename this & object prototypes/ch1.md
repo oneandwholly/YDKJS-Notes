@@ -189,3 +189,22 @@ console.log(foo.count); // 4
 ```
 
 Instead of avoiding to use `this`, we embrace it!
+
+###Its Scope
+
+Another common misconception is to think `this` refers to the lexical scope.
+
+```javascript
+function foo() {
+  var a = 2;
+  this.bar();
+}
+
+function bar() {
+  console.log(this.a);
+}
+
+foo(); //undefined
+```
+
+Trying to reference lexical scope with `this` won't work!
