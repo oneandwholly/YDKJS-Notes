@@ -208,3 +208,15 @@ foo(); //undefined
 ```
 
 Trying to reference lexical scope with `this` won't work!
+
+## What is `this` then?
+
+`this` is not an author time binding, it is a runtime binding. It depends on the location of the function's invocation. It has nothing to do where the function was declared, but has everything to do with how it was called.
+
+When a function is invoked, an active record, execution context is created. This record contains information about where the function was called from(the call-stack), how the function was invoked, what parameters were passed, etc. One of the properties of this record is the `this` binding which will be used for the duration of that function's execution.
+
+## Review
+
+`this` is not the function itself nor the lexical scope.
+
+`this` is actually a binding that is made when a function is invoked, and what it references entirely depends on the location of function invocation.
