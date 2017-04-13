@@ -306,3 +306,66 @@ console.log( bar.a ); // 2
 ```
 
 By calling foo(..) with new in front of it, we've constructed a new object and set that new object as the this for the call of foo(..). So new is the final way that a function call's this can be bound. We'll call this new binding.
+
+## Everything in order
+
+order of precedence : new > explicit binding > implicit binding > default binding
+
+### Determining `this`
+
+1. Is the function called with new (new binding)? If so, this is the newly constructed object.
+2. Is the function called with call or apply (explicit binding), even hidden inside a bind hard binding? If so, this is the explicitly specified object.
+3. Is the function called with a context (implicit binding), otherwise known as an owning or containing object? If so, this is that context object.
+4. Otherwise, default the this (default binding). If in strict mode, pick undefined, otherwise pick the global object.
+
+## Exceptions
+
+If you pass null or undefined as a this binding parameter to call, apply, or bind, those values are effectively ignored, and instead the default binding rule applies to the invocation.
+
+```javascript
+function foo() {
+	console.log( this.a );
+}
+
+var a = 2;
+
+foo.call( null ); // 2
+```
+
+It's quite common to use apply(..) for spreading out arrays of values as parameters to a function call. Similarly, bind(..) can curry parameters (pre-set values), which can be very helpful.
+
+```javascript
+function foo(a,b) {
+	console.log( "a:" + a + ", b:" + b );
+}
+
+// spreading out array as parameters
+foo.apply( null, [2, 3] ); // a:2, b:3
+
+// currying with `bind(..)`
+var bar = foo.bind( null, 2 );
+bar( 3 ); // a:2, b:3
+```
+
+```javascript
+function foo() {
+   console.log("name: " + this.name);
+}
+
+var obj = { name: "obj" },
+    obj2 = { name: "obj2" },
+    obj3 = { name: "obj3" };
+
+var fooOBJ = foo.softBind( obj );
+
+fooOBJ(); // name: obj
+
+obj2.foo = foo.softBind(obj);
+obj2.foo(); // name: obj2   <---- look!!!
+
+fooOBJ.call( obj3 ); // name: obj3   <---- look!
+
+setTimeout( obj2.foo, 10 ); // name: obj   <---- falls back to soft-binding
+```
+
+The soft-bound version of the foo() function can be manually this-bound to obj2 or obj3 as shown, but it falls back to obj if the default binding would otherwise apply.
