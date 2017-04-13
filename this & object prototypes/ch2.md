@@ -282,3 +282,27 @@ console.log( b ); // 5
 ```
 
 bind function returns a new function with `this` bound to whatever object you pass in the the argument.
+
+### `new` binding
+
+In javascript, constructors and just regular functions that are called with `new` keyword.
+
+ there's really no such thing as "constructor functions", but rather construction calls of functions.
+
+When a function is invoked with new in front of it, otherwise known as a constructor call, the following things are done automatically:
+
+1. a brand new object is created (aka, constructed) out of thin air
+2. the newly constructed object is [[Prototype]]-linked
+3. the newly constructed object is set as the this binding for that function call
+4. unless the function returns its own alternate object, the new-invoked function call will automatically return the newly constructed object.
+
+```javascript
+function foo(a) {
+	this.a = a;
+}
+
+var bar = new foo( 2 );
+console.log( bar.a ); // 2
+```
+
+By calling foo(..) with new in front of it, we've constructed a new object and set that new object as the this for the call of foo(..). So new is the final way that a function call's this can be bound. We'll call this new binding.
