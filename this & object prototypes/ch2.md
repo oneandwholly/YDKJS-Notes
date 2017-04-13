@@ -173,3 +173,112 @@ var a = "oops, global"; // `a` also property on global object
 
 doFoo( obj.foo ); // "oops, global"
 ```
+
+### Explicit binding
+
+With implicit binding as we just saw, we had to mutate the object in question to include a reference on itself to the function, and use this property function reference to indirectly (implicitly) bind this to the object.
+
+But, what if you want to force a function call to use a particular object for the this binding, without putting a property function reference on the object?
+
+All functions have some utilities available to them which can be useful for this task.Specifically, functions have call(..) and apply(..) methods. Technically, JavaScript host environments sometimes provide functions which are special enough (a kind way of putting it!) that they do not have such functionality. But those are few. The vast majority of functions provided, and certainly all functions you will create, do have access to call(..) and apply(..)
+
+```javascript
+function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2
+};
+
+foo.call( obj ); // 2
+```
+
+Invoking foo with explicit binding by foo.call(..) allows us to force its this to be obj.
+
+### hard binding
+
+```javascript
+function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2
+};
+
+var bar = function() {
+	foo.call( obj );
+};
+
+bar(); // 2
+setTimeout( bar, 100 ); // 2
+
+// `bar` hard binds `foo`'s `this` to `obj`
+// so that it cannot be overriden
+bar.call( window ); // 2
+```
+
+We create a function bar() which, internally, manually calls foo.call(obj), thereby forcibly invoking foo with obj binding for this. No matter how you later invoke the function bar, it will always manually invoke foo with obj.
+
+```javascript
+function foo(something) {
+  console.log(this.a, something);
+  return this.a + something;
+}
+
+var obj = {
+  a: 2
+};
+
+var bar = function() {
+  return foo.apply(obj, arguments);
+}
+
+var b = bar(3);
+console.log(b);
+```
+
+another way to express this pattern is to use re-usable helper
+```javascript
+function foo(something) {
+	console.log( this.a, something );
+	return this.a + something;
+}
+
+// simple `bind` helper
+function bind(fn, obj) {
+	return function() {
+		return fn.apply( obj, arguments );
+	};
+}
+
+var obj = {
+	a: 2
+};
+
+var bar = bind( foo, obj );
+
+var b = bar( 3 ); // 2 3
+console.log( b ); // 5
+```
+
+ES5 provides `bind` function
+
+```javascript
+function foo(something) {
+	console.log( this.a, something );
+	return this.a + something;
+}
+
+var obj = {
+	a: 2
+};
+
+var bar = foo.bind( obj );
+
+var b = bar( 3 ); // 2 3
+console.log( b ); // 5
+```
+
+bind function returns a new function with `this` bound to whatever object you pass in the the argument.
